@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "dhyanascape-f1433",
+    "staging": "dhyanascape-f1433",
+    "production": "dhyanascape-f1433"
+  }
+}
