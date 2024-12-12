@@ -9,6 +9,8 @@ import * as textToSpeech from '@google-cloud/text-to-speech'
 import * as ffmpegPath from 'ffmpeg-static'
 import * as ffmpeg from 'fluent-ffmpeg'
 import {
+  ApiError,
+  ApiErrorCode,
   ApiResponse,
   FirestoreCollection,
   Meditation,
@@ -26,8 +28,13 @@ export const meditationsController = Router()
 meditationsController.get('/:id', async (request: Request, response, next) => {
   try {
     const meditationId = request.params.id
-    console.log('Inside meditations controller', meditationId)
-    response.status(200).json(new ApiResponse({}))
+    const meditation = await firestoreDb.collection(FirestoreCollection.MEDITATIONS).doc(meditationId).get()
+    if (!meditation.exists) {
+      response.status(404).json(new ApiResponse({}))
+    } else {
+      response.status(200).json(new ApiResponse(meditation.data()))
+    }
+
   } catch (error) {
     next(error)
   }
