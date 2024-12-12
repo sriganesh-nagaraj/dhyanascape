@@ -76,8 +76,9 @@ meditationsController.post(
 export async function processMeditation(meditation: Meditation) {
  try {
   const script = await generateMeditationScript(meditation)
-  await generateGuidedMeditationTrack(script)
-  await mergeGuidedMeditationTrackWithBackgroundMusic()
+  meditation.script = script
+  await generateGuidedMeditationTrack(meditation)
+  await mergeGuidedMeditationTrackWithBackgroundMusic(meditation)
   const link = await uploadMergedTrackToFirebaseStorage(meditation)
   await updateMeditationStatusWithMetadata(
     meditation.id,
@@ -85,8 +86,9 @@ export async function processMeditation(meditation: Meditation) {
     script,
     link
     )
+  console.log('Meditation processed successfully')
   } catch (error) {
-    console.error(error)
+    console.error('Error processing meditation', error)
     await updateMeditationStatusWithMetadata(
       meditation.id,
       MeditationStatus.FAILED,
@@ -161,11 +163,11 @@ Use SSML tags for:
   }
 }
 
-async function generateGuidedMeditationTrack(script: string) {
+async function generateGuidedMeditationTrack(meditation: Meditation) {
   const ttsClient = new textToSpeech.TextToSpeechClient()
   const [response] = await ttsClient.synthesizeSpeech({
     input: {
-      ssml: script,
+      ssml: meditation.script,
     },
     voice: {
       languageCode: 'en-US',
@@ -179,16 +181,16 @@ async function generateGuidedMeditationTrack(script: string) {
 
   // Save the audio to a file
   const writeFile = util.promisify(fs.writeFile)
-  const audioFilePath = `guided-track.mp3`
+  const audioFilePath = `${meditation.id}-guided-track.mp3`
   await writeFile(audioFilePath, response.audioContent as any, 'binary')
 }
 
-async function mergeGuidedMeditationTrackWithBackgroundMusic() {
+async function mergeGuidedMeditationTrackWithBackgroundMusic(meditation: Meditation) {
   ffmpeg.setFfmpegPath(ffmpegPath as unknown as string)
   return new Promise((resolve, reject) => {
     ffmpeg()
       .input('music-1.mp3')
-      .input('guided-track.mp3')
+      .input(`${meditation.id}-guided-track.mp3`)
       .complexFilter([
         {
           filter: 'volume',
@@ -220,18 +222,18 @@ async function mergeGuidedMeditationTrackWithBackgroundMusic() {
         console.log('Audio merging completed successfully')
         resolve('merged-track.mp3')
       })
-      .save('merged-track.mp3')
+      .save(`${meditation.id}-merged-track.mp3`)
   })
 }
 
 async function uploadMergedTrackToFirebaseStorage(meditation: Meditation) {
-  const sourceFilePath = `merged-track.mp3`
+  const sourceFilePath = `${meditation.id}-merged-track.mp3`
   const bucket = storage.bucket('gs://dhyanascape-f1433.firebasestorage.app')
   const file = bucket.file(sourceFilePath)
 
   // Read the local file and upload its contents
   await bucket.upload(sourceFilePath, {
-    destination: `${meditation.id}.mp3`,
+    destination: `${meditation.id}-merged-track.mp3`,
     metadata: {
       contentType: 'audio/mpeg',
     },
