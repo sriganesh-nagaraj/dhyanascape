@@ -59,7 +59,7 @@ meditationsController.post(
         .doc(meditationId)
         .set(meditation)
 
-      response.status(201).json(new ApiResponse({}))
+      response.status(201).json(new ApiResponse(meditation))
     } catch (error) {
       next(error)
     }

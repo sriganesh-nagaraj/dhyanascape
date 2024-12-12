@@ -19,6 +19,6 @@
       "@typescript-eslint"
   ],
   "rules": {
-    "prettier/prettier": ["error", { "singleQuote": true }]
+    "prettier/prettier": ["warn", { "singleQuote": true }]
   }
 }

@@ -12,14 +12,14 @@ setGlobalOptions({ region: 'asia-south1' })
 export const api = onRequest(
   {
     minInstances: 0,
-    maxInstances: 50,
+    maxInstances: 10,
     region: 'asia-south1',
     memory: '512MiB',
   },
   app
 )
 
-export const handleMeditationCreation = onDocumentCreated(
+exports.handleNewMeditationCreation = onDocumentCreated(
   'meditations/{meditationId}',
   async (event) => {
     const meditation = event.data?.data() as Meditation
