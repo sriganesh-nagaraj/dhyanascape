@@ -218,13 +218,13 @@ async function mergeGuidedMeditationTrackWithBackgroundMusic() {
 }
 
 async function uploadMergedTrackToFirebaseStorage(meditation: Meditation) {
-  const filePath = `${meditation.id}.mp3`
+  const sourceFilePath = `merged-track.mp3`
   const bucket = storage.bucket('gs://dhyanascape-f1433.firebasestorage.app')
-  const file = bucket.file(filePath)
+  const file = bucket.file(sourceFilePath)
 
   // Read the local file and upload its contents
-  await bucket.upload(filePath, {
-    destination: filePath,
+  await bucket.upload(sourceFilePath, {
+    destination: `${meditation.id}.mp3`,
     metadata: {
       contentType: 'audio/mpeg',
     },
