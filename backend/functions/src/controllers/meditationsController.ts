@@ -95,7 +95,14 @@ export async function processMeditation(meditation: Meditation) {
       null,
       null
     )
+  } finally {
+    await deleteFiles(meditation)
   }
+}
+
+async function deleteFiles(meditation: Meditation) {
+  fs.unlinkSync(`${meditation.id}-guided-track.mp3`)
+  fs.unlinkSync(`${meditation.id}-merged-track.mp3`)
 }
 
 async function updateMeditationStatusWithMetadata(
@@ -134,7 +141,7 @@ async function generateMeditationScript(meditation: Meditation) {
   //   .replaceAll('xml', '')
   //   .replaceAll('ssml', '')
   // console.log('Refined script', refinedScript)
-  const refinedScript = script.replaceAll(',', ', <break time="500ms"/>')
+  const refinedScript = script.replaceAll(',', ', <break time="1s"/>')
   console.log('Refined script', refinedScript)
   return refinedScript
 }
@@ -236,7 +243,7 @@ async function generateGuidedMeditationTrack(meditation: Meditation) {
     },
     audioConfig: {
       audioEncoding: 'MP3',
-      speakingRate: 0.85,
+      speakingRate: 0.75,
     },
   })
 
