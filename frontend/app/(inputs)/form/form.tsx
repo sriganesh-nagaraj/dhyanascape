@@ -19,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useToast } from '@/hooks/use-toast'
 import {
   INPUT_EMOTION,
   MeditationExpertise,
@@ -41,7 +40,7 @@ export default function InputsForm({ username }: { username: string }) {
     toEmotion: OUTPUT_EMOTION.JOY,
   }
 
-  const { toast } = useToast()
+  // const { toast } = useToast()
 
   async function onSubmit(data: MeditationForm) {
     try {
@@ -49,11 +48,11 @@ export default function InputsForm({ username }: { username: string }) {
       await submitForm(data)
     } catch (error) {
       console.error('Error submitting form', error)
-      toast({
-        title: 'Error',
-        description: 'Something went wrong!!!',
-        variant: 'destructive',
-      })
+      // toast({
+      //   title: 'Error',
+      //   description: 'Something went wrong!!!',
+      //   variant: 'destructive',
+      // })
     }
   }
 
@@ -62,31 +61,45 @@ export default function InputsForm({ username }: { username: string }) {
     defaultValues,
   })
 
+  const meditationTypeEmojiMap = {
+    [MeditationType.SOUND]: '🎶',
+    [MeditationType.THOUGHT]: '💭',
+    [MeditationType.FORM]: '🧘',
+    [MeditationType.VISUALIZATION]: '👀',
+    [MeditationType.NOTHINGNESS]: '🫙',
+  }
+
   console.log(form.formState.errors)
   return (
-    <div>
+    <div className="h-full w-full flex justify-center items-center">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-4 justify-center rounded-lg p-4 border-2 border-gray-200"
+          className="w-full flex flex-col gap-4 justify-center rounded-lg p-6 border-2 border-gray-200"
         >
           <FormField
             control={form.control}
             name="fromEmotion"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>What are you feeling right now?</FormLabel>
+                <FormLabel className="text-xl">
+                  What are you feeling right now?
+                </FormLabel>
                 <FormControl>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-full text-lg font-medium">
                       <SelectValue placeholder="Emotion" />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.values(INPUT_EMOTION).map((emotion) => (
-                        <SelectItem key={emotion} value={emotion}>
+                        <SelectItem
+                          key={emotion}
+                          value={emotion}
+                          className="text-lg font-medium"
+                        >
                           {emotion.charAt(0).toUpperCase() +
                             emotion.slice(1).toLowerCase()}
                         </SelectItem>
@@ -105,18 +118,24 @@ export default function InputsForm({ username }: { username: string }) {
             name="toEmotion"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>What do you want to feel?</FormLabel>
+                <FormLabel className="text-xl">
+                  What do you want to feel?
+                </FormLabel>
                 <FormControl>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-full text-lg font-medium">
                       <SelectValue placeholder="Emotion" />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.values(OUTPUT_EMOTION).map((emotion) => (
-                        <SelectItem key={emotion} value={emotion}>
+                        <SelectItem
+                          key={emotion}
+                          value={emotion}
+                          className="text-lg font-medium"
+                        >
                           {emotion
                             .charAt(0)
                             .toUpperCase()
@@ -142,7 +161,9 @@ export default function InputsForm({ username }: { username: string }) {
             name="meditationExpertise"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>What is your meditation expertise?</FormLabel>
+                <FormLabel className="text-xl">
+                  What is your meditation expertise?
+                </FormLabel>
                 <FormControl>
                   <RadioGroup
                     defaultValue={MeditationExpertise.BEGINNER}
@@ -153,14 +174,24 @@ export default function InputsForm({ username }: { username: string }) {
                         value={MeditationExpertise.BEGINNER}
                         id="option-one"
                       />
-                      <Label htmlFor="option-one">Beginner</Label>
+                      <Label
+                        htmlFor="option-one"
+                        className="text-lg font-medium"
+                      >
+                        Beginner
+                      </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem
                         value={MeditationExpertise.ADVANCED}
                         id="option-two"
                       />
-                      <Label htmlFor="option-two">Advanced</Label>
+                      <Label
+                        htmlFor="option-two"
+                        className="text-lg font-medium"
+                      >
+                        Advanced
+                      </Label>
                     </div>
                   </RadioGroup>
                 </FormControl>
@@ -175,7 +206,7 @@ export default function InputsForm({ username }: { username: string }) {
             name="meditationType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
+                <FormLabel className="text-xl">
                   What type of meditation do you want to do?
                 </FormLabel>
                 <FormControl>
@@ -186,13 +217,14 @@ export default function InputsForm({ username }: { username: string }) {
                     {Object.values(MeditationType).map((type) => (
                       <div className="flex items-center space-x-2" key={type}>
                         <RadioGroupItem value={type} id={type} />
-                        <Label htmlFor={type}>
+                        <Label htmlFor={type} className="text-lg font-medium">
                           {type
                             .charAt(0)
                             .toUpperCase()
                             .concat(
                               type.slice(1).toLowerCase().replaceAll('_', ' ')
-                            )}
+                            )
+                            .concat(` ${meditationTypeEmojiMap[type]}`)}
                         </Label>
                       </div>
                     ))}

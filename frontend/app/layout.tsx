@@ -29,7 +29,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {/**Header with app name*/}
-        <header className="text-2xl font-bold p-4 mb-4">
+        <header className="text-3xl font-bold p-4 mb-4">
           <h1>Dhyanascape</h1>
         </header>
         {children}

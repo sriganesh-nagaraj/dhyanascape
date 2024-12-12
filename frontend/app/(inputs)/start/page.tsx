@@ -10,6 +10,7 @@ export default function StartPage() {
   return (
     <div className="h-full flex gap-4 items-center">
       <Input
+        className="w-full text-lg font-medium"
         placeholder="Enter your name"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
@@ -22,6 +23,7 @@ export default function StartPage() {
       <Button
         onClick={() => router.push(link)}
         disabled={username.length === 0}
+        className="text-lg font-medium"
       >
         Next
       </Button>
