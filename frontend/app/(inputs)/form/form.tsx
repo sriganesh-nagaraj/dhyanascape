@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useToast } from '@/hooks/use-toast'
 import {
   INPUT_EMOTION,
   MeditationExpertise,
@@ -35,12 +36,12 @@ export default function InputsForm({ username }: { username: string }) {
   const defaultValues: MeditationForm = {
     username,
     meditationExpertise: MeditationExpertise.BEGINNER,
-    meditationType: MeditationType.BREATH,
-    fromEmotion: INPUT_EMOTION.ANGER,
+    meditationType: MeditationType.SOUND,
+    fromEmotion: INPUT_EMOTION.SAD,
     toEmotion: OUTPUT_EMOTION.JOY,
   }
 
-  // const { toast } = useToast()
+  const { toast } = useToast()
 
   async function onSubmit(data: MeditationForm) {
     try {
@@ -48,11 +49,11 @@ export default function InputsForm({ username }: { username: string }) {
       await submitForm(data)
     } catch (error) {
       console.error('Error submitting form', error)
-      // toast({
-      //   title: 'Error',
-      //   description: 'Something went wrong!!!',
-      //   variant: 'destructive',
-      // })
+      toast({
+        title: 'Error',
+        description: 'Something went wrong!!!',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -116,8 +117,15 @@ export default function InputsForm({ username }: { username: string }) {
                     <SelectContent>
                       {Object.values(OUTPUT_EMOTION).map((emotion) => (
                         <SelectItem key={emotion} value={emotion}>
-                          {emotion.charAt(0).toUpperCase() +
-                            emotion.slice(1).toLowerCase()}
+                          {emotion
+                            .charAt(0)
+                            .toUpperCase()
+                            .concat(
+                              emotion
+                                .slice(1)
+                                .toLowerCase()
+                                .replaceAll('_', ' ')
+                            )}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -172,31 +180,22 @@ export default function InputsForm({ username }: { username: string }) {
                 </FormLabel>
                 <FormControl>
                   <RadioGroup
-                    defaultValue={MeditationType.BREATH}
+                    defaultValue={MeditationType.SOUND}
                     onValueChange={field.onChange}
                   >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem
-                        value={MeditationType.BREATH}
-                        id="breath"
-                      />
-                      <Label htmlFor="breath">Breath</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value={MeditationType.SOUND} id="music" />
-                      <Label htmlFor="music">Music</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value={MeditationType.FORM} id="form" />
-                      <Label htmlFor="form">Form</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem
-                        value={MeditationType.VISUALIZATION}
-                        id="visualization"
-                      />
-                      <Label htmlFor="visualization">Visualization</Label>
-                    </div>
+                    {Object.values(MeditationType).map((type) => (
+                      <div className="flex items-center space-x-2" key={type}>
+                        <RadioGroupItem value={type} id={type} />
+                        <Label htmlFor={type}>
+                          {type
+                            .charAt(0)
+                            .toUpperCase()
+                            .concat(
+                              type.slice(1).toLowerCase().replaceAll('_', ' ')
+                            )}
+                        </Label>
+                      </div>
+                    ))}
                   </RadioGroup>
                 </FormControl>
                 <FormDescription />

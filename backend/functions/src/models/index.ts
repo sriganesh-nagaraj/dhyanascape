@@ -56,26 +56,32 @@ export enum MeditationExpertise {
 }
 
 export enum MeditationType {
-  BREATH = 'BREATH',
+  THOUGHT = 'THOUGHT',
   SOUND = 'SOUND',
   FORM = 'FORM',
   VISUALIZATION = 'VISUALIZATION',
+  NOTHINGNESS = 'NOTHINGNESS',
 }
 
+// joy / love / peaceful / feeling gratitude / acceptance
 export enum OUTPUT_EMOTION {
   JOY = 'JOY',
   LOVE = 'LOVE',
-  PEACE = 'PEACE',
-  GRATITUDE = 'GRATITUDE',
+  PEACEFUL = 'PEACEFUL',
+  FEELING_GRATITUDE = 'FEELING_GRATITUDE',
   ACCEPTANCE = 'ACCEPTANCE',
 }
 
+// peaceful / sad / upset / anxious / fearful / lonely / guilty / depressed
 export enum INPUT_EMOTION {
-  ANXIETY = 'ANXIETY',
-  FEAR = 'FEAR',
-  GUILT = 'GUILT',
-  ANGER = 'ANGER',
-  SADNESS = 'SADNESS',
+  PEACEFUL = 'PEACEFUL',
+  SAD = 'SAD',
+  UPSET = 'UPSET',
+  ANXIOUS = 'ANXIOUS',
+  FEARFUL = 'FEARFUL',
+  LONELY = 'LONELY',
+  GUILTY = 'GUILTY',
+  DEPRESSED = 'DEPRESSED',
 }
 
 export const MeditationFormSchema = z.object({
