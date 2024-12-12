@@ -62,7 +62,7 @@ export enum MeditationType {
   VISUALIZATION = 'VISUALIZATION',
 }
 
-export enum POSITIVE_EMOTION {
+export enum OUTPUT_EMOTION {
   JOY = 'JOY',
   LOVE = 'LOVE',
   PEACE = 'PEACE',
@@ -70,7 +70,7 @@ export enum POSITIVE_EMOTION {
   ACCEPTANCE = 'ACCEPTANCE',
 }
 
-export enum NEGATIVE_EMOTION {
+export enum INPUT_EMOTION {
   ANXIETY = 'ANXIETY',
   FEAR = 'FEAR',
   GUILT = 'GUILT',
@@ -82,8 +82,8 @@ export const MeditationFormSchema = z.object({
   username: z.string().min(3).max(20),
   meditationExpertise: z.nativeEnum(MeditationExpertise),
   meditationType: z.nativeEnum(MeditationType),
-  fromEmotion: z.nativeEnum(NEGATIVE_EMOTION),
-  toEmotion: z.nativeEnum(POSITIVE_EMOTION),
+  fromEmotion: z.nativeEnum(INPUT_EMOTION),
+  toEmotion: z.nativeEnum(OUTPUT_EMOTION),
 })
 
 export type MeditationForm = z.infer<typeof MeditationFormSchema>
@@ -99,8 +99,8 @@ export type Meditation = {
   username: string
   meditationExpertise: MeditationExpertise
   meditationType: MeditationType
-  fromEmotion: NEGATIVE_EMOTION
-  toEmotion: POSITIVE_EMOTION
+  fromEmotion: INPUT_EMOTION
+  toEmotion: OUTPUT_EMOTION
   createdAt: FieldValue | Timestamp
   updatedAt: FieldValue | Timestamp
   status: MeditationStatus

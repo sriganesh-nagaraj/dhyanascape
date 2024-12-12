@@ -1,7 +1,13 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { NextFunction, Request, Response, Router } from 'express'
 import { FieldValue } from 'firebase-admin/firestore'
+import * as fs from 'fs'
+import * as util from 'util'
 import { v4 as uuidv4 } from 'uuid'
+
+import * as textToSpeech from '@google-cloud/text-to-speech'
+import * as ffmpegPath from 'ffmpeg-static'
+import * as ffmpeg from 'fluent-ffmpeg'
 import {
   ApiResponse,
   FirestoreCollection,
@@ -11,8 +17,9 @@ import {
   MeditationStatus,
   MeditationType,
 } from '../models'
-import { firestoreDb } from '../utils/config'
+import { firestoreDb, storage } from '../utils/config'
 import { requestValidator } from '../utils/middleware'
+import { getDownloadURL } from 'firebase-admin/storage'
 
 export const meditationsController = Router()
 
@@ -52,20 +59,47 @@ meditationsController.post(
         .doc(meditationId)
         .set(meditation)
 
-      const script = await generateMeditationScript(meditation)
-      meditation.script = script
-
-      await firestoreDb
-        .collection(FirestoreCollection.MEDITATIONS)
-        .doc(meditationId)
-        .update({ script })
-
-      response.status(201).json(new ApiResponse(meditation))
+      response.status(201).json(new ApiResponse({}))
     } catch (error) {
       next(error)
     }
   }
 )
+
+export async function processMeditation(meditation: Meditation) {
+ try {
+  const script = await generateMeditationScript(meditation)
+  await generateGuidedMeditationTrack(script)
+  await mergeGuidedMeditationTrackWithBackgroundMusic()
+  const link = await uploadMergedTrackToFirebaseStorage(meditation)
+  await updateMeditationStatusWithMetadata(
+    meditation.id,
+    MeditationStatus.COMPLETED,
+    script,
+    link
+    )
+  } catch (error) {
+    console.error(error)
+    await updateMeditationStatusWithMetadata(
+      meditation.id,
+      MeditationStatus.FAILED,
+      null,
+      null
+    )
+  }
+}
+
+async function updateMeditationStatusWithMetadata(
+  meditationId: string,
+  status: MeditationStatus,
+  script: string | null,
+  link: string | null
+) {
+  await firestoreDb
+    .collection(FirestoreCollection.MEDITATIONS)
+    .doc(meditationId)
+    .update({ status, script, link })
+}
 
 async function generateMeditationScript(meditation: Meditation) {
   const prompt = getBasePromptForscript(meditation)
@@ -118,4 +152,86 @@ Use SSML tags for:
 - Prosody: <prosody rate="slow">slower speech</prosody>
 - Breathing space: <break time="3s"/>`
   }
+}
+
+async function generateGuidedMeditationTrack(script: string) {
+  const ttsClient = new textToSpeech.TextToSpeechClient()
+  const [response] = await ttsClient.synthesizeSpeech({
+    input: {
+      ssml: script,
+    },
+    voice: {
+      languageCode: 'en-US',
+      name: 'en-AU-Wavenet-A',
+    },
+    audioConfig: {
+      audioEncoding: 'MP3',
+      speakingRate: 0.85,
+    },
+  })
+
+  // Save the audio to a file
+  const writeFile = util.promisify(fs.writeFile)
+  const audioFilePath = `guided-track.mp3`
+  await writeFile(audioFilePath, response.audioContent as any, 'binary')
+}
+
+async function mergeGuidedMeditationTrackWithBackgroundMusic() {
+  ffmpeg.setFfmpegPath(ffmpegPath as unknown as string)
+  return new Promise((resolve, reject) => {
+    ffmpeg()
+      .input('music-1.mp3')
+      .input('guided-track.mp3')
+      .complexFilter([
+        {
+          filter: 'volume',
+          options: '0.5',
+          inputs: '0',
+          outputs: 'quietMusic',
+        },
+        {
+          filter: 'amix',
+          options: {
+            inputs: 2,
+            duration: 'shortest',
+          },
+          inputs: ['quietMusic', '1'],
+          outputs: 'mixed',
+        },
+        {
+          filter: 'volume',
+          options: '2',
+          inputs: 'mixed',
+        },
+      ])
+      .toFormat('mp3')
+      .on('error', (err) => {
+        console.error('An error occurred:', err)
+        reject(err)
+      })
+      .on('end', () => {
+        console.log('Audio merging completed successfully')
+        resolve('merged-track.mp3')
+      })
+      .save('merged-track.mp3')
+  })
+}
+
+async function uploadMergedTrackToFirebaseStorage(meditation: Meditation) {
+  const filePath = `${meditation.id}.mp3`
+  const bucket = storage.bucket('gs://dhyanascape-f1433.firebasestorage.app')
+  const file = bucket.file(filePath)
+
+  // Read the local file and upload its contents
+  await bucket.upload(filePath, {
+    destination: filePath,
+    metadata: {
+      contentType: 'audio/mpeg',
+    },
+    public: true,
+  })
+
+  const url = await getDownloadURL(file)
+  console.log(url)
+  return url
 }
