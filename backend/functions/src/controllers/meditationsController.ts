@@ -266,7 +266,7 @@ async function mergeGuidedMeditationTrackWithBackgroundMusic(
       .complexFilter([
         {
           filter: 'volume',
-          options: '0.5',
+          options: '0.4',
           inputs: '0',
           outputs: 'quietMusic',
         },
