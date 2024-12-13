@@ -1,6 +1,8 @@
 import { Toaster } from '@/components/ui/toaster'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
+import Image from 'next/image'
+import Link from 'next/link'
 import './globals.css'
 
 const geistSans = Geist({
@@ -29,9 +31,19 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {/**Header with app name*/}
-        <header className="text-3xl font-bold p-4 mb-4">
+        <Link
+          href="/start"
+          className="text-3xl font-bold p-4 mb-4 flex items-center gap-2"
+        >
+          <Image
+            src="/dhyanascape-logo.webp"
+            alt="Dhyanascape"
+            width={100}
+            height={100}
+            className="w-10 h-10 rounded-full"
+          />
           <h1>Dhyanascape</h1>
-        </header>
+        </Link>
         {children}
         <Toaster />
       </body>

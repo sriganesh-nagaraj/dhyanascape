@@ -20,7 +20,7 @@ export default function MeditationTrackPlayer({ id }: { id: string }) {
   if (meditation) {
     switch (meditation.status) {
       case MeditationStatus.PENDING:
-        return <div>Generating meditation...</div>
+        return <p className="text-2xl font-bold">Generating meditation...</p>
       case MeditationStatus.COMPLETED:
         return <audio src={meditation.link ?? ''} controls />
       case MeditationStatus.FAILED:
