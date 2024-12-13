@@ -149,8 +149,9 @@ async function generateMeditationScript(meditation: Meditation) {
 function getFinalPromptForscript(meditation: Meditation) {
   const fromEmotion = meditation.fromEmotion.toLowerCase().replace('_', ' ')
   const toEmotion = meditation.toEmotion.toLowerCase().replace('_', ' ')
+  // todo: hardcoded to sound for now to not exceed quota. Can change to other meditation types later
   const meditationTypePrompt = getPromptForMeditationType(
-    meditation.meditationType,
+    MeditationType.SOUND,
     fromEmotion,
     toEmotion
   )
@@ -256,10 +257,11 @@ async function generateGuidedMeditationTrack(meditation: Meditation) {
 async function mergeGuidedMeditationTrackWithBackgroundMusic(
   meditation: Meditation
 ) {
+  const backgroundMusicFileName = getBackgroundMusicFileName()
   ffmpeg.setFfmpegPath(ffmpegPath as unknown as string)
   return new Promise((resolve, reject) => {
     ffmpeg()
-      .input('music-1.mp3')
+      .input(backgroundMusicFileName)
       .input(`${meditation.id}-guided-track.mp3`)
       .complexFilter([
         {
@@ -313,4 +315,10 @@ async function uploadMergedTrackToFirebaseStorage(meditation: Meditation) {
   const url = await getDownloadURL(file)
   console.log(url)
   return url
+}
+
+function getBackgroundMusicFileName() {
+  //random number between 1 and 6
+  const randomNumber = Math.floor(Math.random() * 6) + 1
+  return `music-tracks/music-${randomNumber}.mp3`
 }
