@@ -192,9 +192,8 @@ function getPromptForMeditationType(
       return `
       a. Guide the user to focus on the sound or music playing in the background.
       b. Encourage them to notice details such as tone, rhythm, and subtle changes.
-      c. Every 10 seconds, gently remind them: "If your mind wanders, gently return your attention to the sound."
-      d. Explore different aspects of the sound each time, like: The depth, pitch, or how the sound resonates within them.
-      e. Allow the sound to lead them from ${fromEmotion} to ${toEmotion}.
+      c. Explore different aspects of the sound each time, like: The depth, pitch, or how the sound resonates within them.
+      d. Allow the sound to lead them from ${fromEmotion} to ${toEmotion}.
   `
     case MeditationType.FORM:
       return `
