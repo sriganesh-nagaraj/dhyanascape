@@ -193,7 +193,8 @@ function getPromptForMeditationType(
       a. Guide the user to focus on the sound or music playing in the background.
       b. Encourage them to notice details such as tone, rhythm, and subtle changes.
       c. Explore different aspects of the sound each time, like: The depth, pitch, or how the sound resonates within them.
-      d. Allow the sound to lead them from ${fromEmotion} to ${toEmotion}.
+      d. Incorporate ample pauses to allow the user to listen to the sound.
+      e. Allow the sound to lead them from ${fromEmotion} to ${toEmotion}.
   `
     case MeditationType.FORM:
       return `
