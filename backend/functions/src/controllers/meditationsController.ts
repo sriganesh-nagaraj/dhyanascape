@@ -103,6 +103,10 @@ export async function processMeditation(meditation: Meditation) {
 async function deleteFiles(meditation: Meditation) {
   fs.unlinkSync(`${meditation.id}-guided-track.mp3`)
   fs.unlinkSync(`${meditation.id}-merged-track.mp3`)
+  // delete the guided track from firebase storage
+  const bucket = storage.bucket(process.env.DHYANASCAPE_BUCKET_NAME)
+  const file = bucket.file(`${meditation.id}-guided-track.mp3`)
+  await file.delete()
 }
 
 async function updateMeditationStatusWithMetadata(
