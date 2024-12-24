@@ -149,9 +149,8 @@ async function generateMeditationScript(meditation: Meditation) {
 function getFinalPromptForscript(meditation: Meditation) {
   const fromEmotion = meditation.fromEmotion.toLowerCase().replace('_', ' ')
   const toEmotion = meditation.toEmotion.toLowerCase().replace('_', ' ')
-  // todo: hardcoded to sound for now to not exceed quota. Can change to other meditation types later
   const meditationTypePrompt = getPromptForMeditationType(
-    MeditationType.SOUND,
+    meditation.meditationType,
     fromEmotion,
     toEmotion
   )
@@ -233,25 +232,33 @@ function getPromptForMeditationType(
 }
 
 async function generateGuidedMeditationTrack(meditation: Meditation) {
-  const ttsClient = new textToSpeech.TextToSpeechClient()
-  const [response] = await ttsClient.synthesizeSpeech({
+  const ttsClient = new textToSpeech.TextToSpeechLongAudioSynthesizeClient()
+  const [operation] = await ttsClient.synthesizeLongAudio({
     input: {
       ssml: meditation.script,
     },
     voice: {
-      languageCode: 'en-US',
+      languageCode: 'en-IN',
       name: 'en-IN-Wavenet-F',
     },
     audioConfig: {
       audioEncoding: 'MP3',
       speakingRate: 0.75,
     },
+    outputGcsUri: `${process.env.DHYANASCAPE_BUCKET_NAME}/${meditation.id}-guided-track.mp3`,
+    parent: `projects/${process.env.FIREBASE_PROJECT_ID}/locations/global`,
   })
 
+  const [response] = await operation.promise()
+  console.log('Long audio synthesis operation response', response)
+  // Retrieve the audio file from cloud storage
+  const bucket = storage.bucket(process.env.DHYANASCAPE_BUCKET_NAME)
+  const file = bucket.file(`${meditation.id}-guided-track.mp3`)
+  const [audioContent] = await file.download()
   // Save the audio to a file
   const writeFile = util.promisify(fs.writeFile)
   const audioFilePath = `${meditation.id}-guided-track.mp3`
-  await writeFile(audioFilePath, response.audioContent as any, 'binary')
+  await writeFile(audioFilePath, audioContent as any, 'binary')
 }
 
 async function mergeGuidedMeditationTrackWithBackgroundMusic(
@@ -300,7 +307,7 @@ async function mergeGuidedMeditationTrackWithBackgroundMusic(
 
 async function uploadMergedTrackToFirebaseStorage(meditation: Meditation) {
   const sourceFilePath = `${meditation.id}-merged-track.mp3`
-  const bucket = storage.bucket('gs://dhyanascape-f1433.firebasestorage.app')
+  const bucket = storage.bucket(process.env.DHYANASCAPE_BUCKET_NAME)
   const file = bucket.file(sourceFilePath)
 
   // Read the local file and upload its contents

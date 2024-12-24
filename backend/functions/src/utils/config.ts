@@ -5,7 +5,7 @@ import { logger } from 'firebase-functions/v2'
 
 firebaseAdmin.initializeApp({
   credential: firebaseAdmin.credential.applicationDefault(),
-  storageBucket: 'gs://dhyanascape-f1433.firebasestorage.app',
+  storageBucket: process.env.DHYANASCAPE_BUCKET_NAME,
 })
 
 const firestoreDb = getFirestore()
