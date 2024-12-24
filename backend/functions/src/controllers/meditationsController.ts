@@ -242,11 +242,11 @@ async function generateGuidedMeditationTrack(meditation: Meditation) {
       name: 'en-IN-Wavenet-F',
     },
     audioConfig: {
-      audioEncoding: 'MP3',
+      audioEncoding: 'LINEAR16',
       speakingRate: 0.75,
     },
     outputGcsUri: `${process.env.DHYANASCAPE_BUCKET_NAME}/${meditation.id}-guided-track.mp3`,
-    parent: `projects/${process.env.FIREBASE_PROJECT_ID}/locations/global`,
+    parent: `projects/${process.env.PROJECT_ID}/locations/global`,
   })
 
   const [response] = await operation.promise()
