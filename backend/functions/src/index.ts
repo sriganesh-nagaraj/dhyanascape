@@ -20,7 +20,10 @@ export const api = onRequest(
 )
 
 exports.handleNewMeditationCreation = onDocumentCreated(
-  'meditations/{meditationId}',
+  {
+    document: 'meditations/{meditationId}',
+    memory: '512MiB',
+  },
   async (event) => {
     const meditation = event.data?.data() as Meditation
     await processMeditation(meditation)
